@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>闲鱼商品智能分析系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1em;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .status.show {
+            display: block;
+        }
+
+        .results {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .results.show {
+            display: block;
+        }
+
+        .result-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .result-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .result-price {
+            font-size: 1.5em;
+            color: #667eea;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .result-reason {
+            color: #666;
+            line-height: 1.6;
+            margin-top: 10px;
+        }
+
+        .result-score {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            flex: 1;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-card h3 {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 闲鱼商品智能分析系统</h1>
+            <p>基于 Gemini AI 的高性价比商品推荐</p>
+        </div>
+
+        <div class="content">
+            <div class="form-group">
+                <label for="apiKey">Gemini API Key</label>
+                <input type="password" id="apiKey" placeholder="请输入您的 Gemini API Key">
+            </div>
+
+            <div class="form-group">
+                <label for="keyword">搜索关键词</label>
+                <input type="text" id="keyword" placeholder="例如：iPhone 15 Pro、笔记本电脑等">
+            </div>
+
+            <button class="btn" id="searchBtn" onclick="startSearch()">🚀 开始搜索与分析</button>
+
+            <div id="status" class="status"></div>
+
+            <div id="stats" class="stats" style="display: none;">
+                <div class="stat-card">
+                    <h3 id="totalCount">0</h3>
+                    <p>总商品数</p>
+                </div>
+                <div class="stat-card">
+                    <h3 id="recommendCount">0</h3>
+                    <p>推荐商品</p>
+                </div>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p id="loadingText">正在处理中...</p>
+            </div>
+
+            <div id="results" class="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:5000/api';
+
+        async function startSearch() {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            const keyword = document.getElementById('keyword').value.trim();
+
+            if (!apiKey) {
+                showStatus('请输入 Gemini API Key', 'error');
+                return;
+            }
+
+            if (!keyword) {
+                showStatus('请输入搜索关键词', 'error');
+                return;
+            }
+
+            // 禁用按钮
+            const btn = document.getElementById('searchBtn');
+            btn.disabled = true;
+            btn.textContent = '处理中...';
+
+            // 显示加载状态
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('results').classList.remove('show');
+            document.getElementById('stats').style.display = 'none';
+
+            try {
+                // 1. 初始化API
+                showStatus('正在初始化 Gemini API...', 'info');
+                const initRes = await fetch(`${API_BASE}/init`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+
+                if (!initRes.ok) {
+                    const data = await initRes.json();
+                    throw new Error(data.message || '初始化失败');
+                }
+
+                // 2. 启动搜索
+                showStatus('正在启动爬虫，请在弹出的浏览器窗口中登录闲鱼...', 'info');
+                document.getElementById('loadingText').textContent = '等待登录中...';
+                
+                const searchRes = await fetch(`${API_BASE}/search`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ keyword: keyword, api_key: apiKey })
+                });
+
+                if (!searchRes.ok) {
+                    const data = await searchRes.json();
+                    throw new Error(data.message || '搜索失败');
+                }
+
+                // 3. 轮询状态
+                showStatus('爬虫已启动，正在抓取商品数据...', 'info');
+                document.getElementById('loadingText').textContent = '正在抓取商品数据...';
+                
+                let attempts = 0;
+                const maxAttempts = 120; // 最多等待2分钟
+
+                const checkStatus = setInterval(async () => {
+                    attempts++;
+                    const statusRes = await fetch(`${API_BASE}/status`);
+                    const status = await statusRes.json();
+
+                    // 爬虫已完成
+                    if (!status.running) {
+                        clearInterval(checkStatus);
+                        
+                        // 有错误
+                        if (status.error) {
+                            throw new Error(status.error);
+                        }
+                        // 有数据
+                        else if (status.data_count > 0) {
+                            showStatus(`成功抓取 ${status.data_count} 个商品，正在使用 Gemini 分析...`, 'success');
+                            document.getElementById('loadingText').textContent = 'AI 正在分析商品...';
+                            await analyzeData(apiKey, status.data_count);
+                        }
+                        // 无数据无错误（可能是爬虫完成但没抓到数据）
+                        else {
+                            throw new Error('未抓取到商品数据，请检查：1. 是否已登录闲鱼 2. 搜索关键词是否正确 3. 浏览器窗口是否正常');
+                        }
+                    }
+                    // 超时
+                    else if (attempts >= maxAttempts) {
+                        clearInterval(checkStatus);
+                        throw new Error('爬取超时（超过2分钟），请检查浏览器窗口或重新尝试');
+                    }
+                }, 1000);
+
+            } catch (error) {
+                showStatus(`错误: ${error.message}`, 'error');
+                document.getElementById('loading').style.display = 'none';
+                btn.disabled = false;
+                btn.textContent = '🚀 开始搜索与分析';
+            }
+        }
+
+        async function analyzeData(apiKey, totalCount) {
+            try {
+                const analyzeRes = await fetch(`${API_BASE}/analyze`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ api_key: apiKey })
+                });
+
+                if (!analyzeRes.ok) {
+                    const errorData = await analyzeRes.json();
+                    // 如果有备选分析结果，使用它
+                    if (errorData.fallback_available && errorData.data) {
+                        showStatus('⚠️ Gemini API 不可用，已使用本地简单分析', 'info');
+                        displayResults(errorData.data, totalCount);
+                        return;
+                    }
+                    throw new Error(errorData.message || '分析失败');
+                }
+
+                const result = await analyzeRes.json();
+                displayResults(result.data, totalCount);
+
+            } catch (error) {
+                showStatus(`分析错误: ${error.message}`, 'error');
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('searchBtn').disabled = false;
+                document.getElementById('searchBtn').textContent = '🚀 开始搜索与分析';
+            }
+        }
+
+        function displayResults(data, totalCount) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('results').classList.add('show');
+            document.getElementById('stats').style.display = 'flex';
+            
+            document.getElementById('totalCount').textContent = totalCount;
+            document.getElementById('recommendCount').textContent = data.length;
+
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (data.length === 0) {
+                resultsDiv.innerHTML = '<div class="status info show">未找到高性价比商品</div>';
+                return;
+            }
+
+            data.forEach(item => {
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'result-item';
+                itemDiv.innerHTML = `
+                    <div class="result-title">${item.title || '未知商品'}</div>
+                    <div class="result-price">¥${item.price || '0'}</div>
+                    <div class="result-reason">${item.reason || '推荐理由未提供'}</div>
+                    <div class="result-score">评分: ${item.score || 'N/A'}/10</div>
+                `;
+                resultsDiv.appendChild(itemDiv);
+            });
+
+            showStatus(`分析完成！找到 ${data.length} 个高性价比商品`, 'success');
+            document.getElementById('searchBtn').disabled = false;
+            document.getElementById('searchBtn').textContent = '🚀 开始搜索与分析';
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = `status ${type} show`;
+        }
+    </script>
+</body>
+</html>
+

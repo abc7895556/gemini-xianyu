@@ -1,0 +1,88 @@
+========================================
+  依赖安装问题解决方案
+========================================
+
+如果遇到依赖安装失败，请按以下步骤操作：
+
+方法1：使用专用安装脚本（推荐）
+----------------------------------------
+双击运行：install_dependencies.bat
+
+如果网络较慢，可以尝试：
+双击运行：install_dependencies_cn.bat（使用国内镜像）
+
+方法2：手动安装
+----------------------------------------
+1. 打开命令提示符（CMD）或 PowerShell
+
+2. 进入项目目录：
+   cd C:\Users\叶佳乐\Desktop
+
+3. 升级pip：
+   python -m pip install --upgrade pip
+
+4. 安装依赖：
+   pip install flask flask-cors playwright google-genai requests
+
+5. 安装Playwright浏览器：
+   playwright install chromium
+
+方法3：使用国内镜像（如果网络慢）
+----------------------------------------
+pip install -i https://pypi.tuna.tsinghua.edu.cn/simple flask flask-cors playwright google-genai requests
+
+方法4：逐个安装（如果批量安装失败）
+----------------------------------------
+pip install flask
+pip install flask-cors
+pip install playwright
+pip install google-genai
+pip install requests
+playwright install chromium
+
+========================================
+  常见错误及解决方法
+========================================
+
+错误1：pip 不是内部或外部命令
+解决：确保Python已正确安装，并将Python添加到系统PATH
+
+错误2：ERROR: Could not find a version that satisfies the requirement
+解决：
+- 升级pip: python -m pip install --upgrade pip
+- 使用国内镜像源（见方法3）
+
+错误3：网络超时
+解决：
+- 使用国内镜像源
+- 检查网络连接
+- 关闭VPN（如果开启）
+
+错误4：权限不足
+解决：
+- 以管理员身份运行命令提示符
+- 或使用：pip install --user [包名]
+
+错误5：google-genai 安装失败
+解决：
+- 确保Python版本 >= 3.8
+- 尝试：pip install google-genai --upgrade
+- 如果仍然失败，可能需要使用代理
+
+========================================
+  验证安装
+========================================
+
+运行以下命令验证是否安装成功：
+
+python -c "import flask; print('Flask OK')"
+python -c "import flask_cors; print('Flask-CORS OK')"
+python -c "from playwright.sync_api import sync_playwright; print('Playwright OK')"
+python -c "from google import genai; print('Google Genai OK')"
+python -c "import requests; print('Requests OK')"
+
+如果所有命令都显示OK，说明安装成功！
+
+========================================
+
+
