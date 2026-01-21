@@ -1,5 +1,7 @@
 # 闲鱼商品智能分析系统
 
+全程由Cursor生成，本人无代码基础，求修改！
+
 基于 Flask 后端 + HTML 前端的闲鱼商品爬取与 AI 分析系统，使用 Gemini AI 进行高性价比商品推荐。
 
 ## 功能特点
@@ -91,5 +93,6 @@ python app.py
 ## 许可证
 
 MIT License
+
 
 
